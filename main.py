@@ -1,34 +1,66 @@
-from tkinter import *
-
-root = Tk()
-root.maxsize(800, 600)
-root.minsize(800, 600)
-root.title("Realtime EarthQuakes Data")
-
-l1 = Label(root, text="Start Date: ", pady=10, padx=10)
-l2 = Label(root, text="End Date: ", pady=10, padx=10)
-l3 = Label(root, text="Format (YYYY-MM-DD)", pady=10, padx=10)
-l4 = Label(root, text="Location (Optional): ", pady=10, padx=10)
-l5 = Label(root, text="Min Magnitude (Optional): ", pady=10, padx=10)
-l6 = Label(root, text="Limit (Optional): ", pady=10, padx=10)
-startDate = Entry()
-startDate.grid(row=0, column=1, pady=10, padx=10)
-endDate = Entry()
-endDate.grid(row=0, column=3, pady=10, padx=10)
-location = Entry()
-location.grid(row=1, column=1, pady=10, padx=10)
-minMag = Entry()
-minMag.grid(row=1, column=3, pady=10, padx=10)
-limit = Entry()
-limit.grid(row=2, column=1, pady=10, padx=10)
-l1.grid(row=0, column=0)
-l2.grid(row=0, column=2)
-l3.grid(row=0, column=4)
-l4.grid(row=1, column=0)
-l5.grid(row=1, column=2)
-l6.grid(row=2, column=0)
+import json
+import csv
+import urllib.parse
+import requests
 
 
+class EarthQuake:
+    def __init__(self, mag, place, time, url, details, tsunami):
+        self.alt = None
+        self.lon = None
+        self.lat = None
+        self.mag = mag
+        self.place = place
+        self.time = time
+        self.url = url
+        self.details = details
+        self.tsunami = tsunami
+
+    def setCoordinates(self, lon, lat, alt):
+        self.lon = lon
+        self.lat = lat
+        self.alt = alt
 
 
-root.mainloop()
+print("*************************** EarthQuake Data Provider *****************************************")
+
+# 2021-04-01&endtime=2021-09-30&minmag=6&limit=10
+
+while (1):
+
+    st = input("Enter start time: ")
+    et = input("Enter end Time: ")
+    mm = input("Min Magnitude: ")
+
+    url = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime="
+    url += st + "&endtime=" + et + "&minmag=" + mm + "&limit=10"
+
+    json_data = requests.get(url).json()
+    # print(json_data)
+
+    json_features = json_data['features']
+    #  print(json_features)
+
+    ls = [None] * len(json_features)
+    i = 0
+    for ele in json_features:
+        curF = ele
+        prop = curF['properties']
+        eq = EarthQuake(prop['mag'], prop['place'], prop['time'], prop['url'], prop['detail'], prop['tsunami'])
+        ls[i] = eq
+        i += 1
+    i = 0
+    for ele in ls:
+        eq = ele
+        print("EarthQuake %d: " % (i + 1))
+        print("Mag: ", eq.mag)
+        print("place: ", eq.place)
+        print("url: ", eq.url)
+        print("time: ", eq.time)
+        print("Tsunami?: ", eq.tsunami)
+        i += 1
+        print()
+
+    n = int(input("\nTry Again? 1.Yes 2.Quit:    "))
+    if n == 2:
+        break
