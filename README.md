@@ -1,2 +1,2 @@
 # EarthQuake_Project
-An Desktop application for real time Earthquake details Using Tkinter and Python
+Fetching and formating Json Data using python from USGS.
